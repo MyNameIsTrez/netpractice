@@ -1,0 +1,33 @@
+{
+	"clients": [ "R12", "C1", "D1" ],
+	"goals": [
+		{ "C1": "D1" }, { "D1": "C1" },
+		{ "C1": "R12" }, { "R12": "C1" },
+		{ "D1": "R12" }, { "R12": "D1" }
+	],
+	"interface_connections": {
+		"R12": [ "R13" ],
+		"R13": [ "R12", "R21" ],
+		"R21": [ "R13", "R22", "R23" ],
+		"R22": [ "R21", "R23", "C1" ],
+		"R23": [ "R21", "R22", "D1" ],
+		"C1": [ "R22" ],
+		"D1": [ "R23"]
+	},
+	"interfaces": {
+		"R12": { "ip": "163.115.250.12", "mask": "255.255.255.240" },
+		"R13": { "ip": null, "mask": null },
+		"R21": { "ip": null, "mask": null },
+		"R22": { "ip": null, "mask": null },
+		"R23": { "ip": null, "mask": null },
+		"C1": { "ip": null, "mask": null },
+		"D1": { "ip": null, "mask": "255.255.255.240" }
+	},
+	"routing_tables": {
+		"I": [ { "destination": "133.245.16.0", "cidr": 26, "next_hop": null } ],
+		"R1": [ { "destination": null, "cidr": null, "next_hop": null }, { "destination": "0.0.0.0", "cidr": 0, "next_hop": "163.115.250.1" } ],
+		"R2": [ { "destination": null, "cidr": null, "next_hop": "133.245.16.62" } ],
+		"C": [ { "destination": null, "cidr": null, "next_hop": null } ],
+		"D": [ { "destination": null, "cidr": null, "next_hop": null } ]
+	}
+}

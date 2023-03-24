@@ -1,44 +1,14 @@
 from pprint import pprint
-
-
-levels = {
-	"level8": {
-		"clients": [ "R12", "C1", "D1" ],
-		"goals": [
-			{ "C1": "D1" }, { "D1": "C1" },
-			{ "C1": "R12" }, { "R12": "C1" },
-			{ "D1": "R12" }, { "R12": "D1" },
-		],
-		"interface_connections": {
-			"R13": "R21", "R21": "R13",
-			"R22": "C1", "C1": "R22",
-			"R23": "D1", "D1": "R23",
-		},
-		"interfaces": {
-			"R12": { "ip": "163.115.250.12", "mask": "255.255.255.240" },
-			"R13": { "ip": None, "mask": None },
-			"R21": { "ip": None, "mask": None },
-			"R22": { "ip": None, "mask": None },
-			"R23": { "ip": None, "mask": None },
-			"C1": { "ip": None, "mask": None },
-			"D1": { "ip": None, "mask": "255.255.255.240" },
-		},
-		"routing_tables": {
-			"I": [ { "destination": "133.245.16.0", "cidr": 26, "next_hop": None } ],
-			"R1": [ { "destination": None, "cidr": None, "next_hop": None }, { "destination": "0.0.0.0", "cidr": 0, "next_hop": "163.115.250.1" } ],
-			"R2": [ { "destination": None, "cidr": None, "next_hop": "133.245.16.62" } ],
-			"C": [ { "destination": None, "cidr": None, "next_hop": None } ],
-			"D": [ { "destination": None, "cidr": None, "next_hop": None } ],
-		},
-	}
-}
+import json
 
 
 def main():
-	level = levels["level8"]
+	with open("levels/level8.json") as f:
+		level = json.load(f)
 	mark_known_interfaces(level)
 	mark_known_routing_tables(level)
-	print_level(level)
+	solve(level)
+	# print_level(level)
 
 
 def mark_known_interfaces(level):
@@ -53,6 +23,11 @@ def mark_known_routing_tables(level):
 			route["destination_known"] = route["destination"] is not None
 			route["cidr_known"] = route["cidr"] is not None
 			route["next_hop_known"] = route["next_hop"] is not None
+
+
+def solve(level):
+	for goal in level["goals"]:
+		print(goal)
 
 
 def print_level(level):
