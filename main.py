@@ -1,25 +1,21 @@
-from pprint import pprint
 import json
+from pprint import pprint
 
 
 def main():
 	with open("levels/level8.json") as f:
 		level = json.load(f)
-	mark_known_interfaces(level)
-	mark_known_routing_tables(level)
+	mark_known(level)
 	solve(level)
-	# print_level(level)
+	print_level(level)
 
 
-def mark_known_interfaces(level):
+def mark_known(level):
 	for interface in level["interfaces"].values():
 		interface["ip_known"] = interface["ip"] is not None
 		interface["mask_known"] = interface["mask"] is not None
 
-
-def mark_known_routing_tables(level):
-	for routing_table in level["routing_tables"].values():
-		for route in routing_table:
+		for route in interface["routing_table"]:
 			route["destination_known"] = route["destination"] is not None
 			route["cidr_known"] = route["cidr"] is not None
 			route["next_hop_known"] = route["next_hop"] is not None
@@ -70,22 +66,38 @@ def solve(level):
 
 def print_level(level):
 	print_interfaces(level["interfaces"])
-	print()
-	print_routing_tables(level["routing_tables"])
 
 
 def print_interfaces(interfaces):
 	print("interfaces:")
 	for interface_name, interface in interfaces.items():
-		ip_known = interface["ip_known"]
-		mask_known = interface["mask_known"]
-		if not ip_known or not mask_known:
-			string = f"{interface_name}:"
-			if not ip_known:
-				string += f" ip: {interface['ip']}"
-			if not mask_known:
-				string += f" mask: {interface['mask']}"
-			print(string)
+		interface_string = ""
+
+		if not interface["ip_known"]:
+			interface_string += f", ip: {interface['ip']}"
+		if not interface["mask_known"]:
+			interface_string += f", mask: {interface['mask']}"
+
+		routes_string = ""
+
+		for route in interface["routing_table"]:
+			route_string = ""
+
+			if not route["destination_known"]:
+				route_string += f"destination: {route['destination']}, "
+			if not route["cidr_known"]:
+				route_string += f"cidr: {route['cidr']}, "
+			if not route["next_hop_known"]:
+				route_string += f"next_hop: {route['next_hop']}, "
+
+			if route_string:
+				routes_string += f"{{ {route_string}}},"
+
+		if routes_string:
+			interface_string += f", routing_table: [ {routes_string} ]"
+
+		if interface_string:
+			print(f"{interface_name}" + interface_string)
 
 
 def print_routing_tables(routing_tables):
