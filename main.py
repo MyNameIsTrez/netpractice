@@ -26,8 +26,46 @@ def mark_known_routing_tables(level):
 
 
 def solve(level):
+	"""Replaces None values in level with solved values.
+
+	It relies on these observations:
+	1. Switches can be entirely ignored.
+	Just create a web of connections between interfaces.
+	2. Routers can be entirely ignored.
+	Just assign the router's routing table to all its interfaces.
+	3. Every interface has a (possibly empty) routing table.
+	4. If an interface can't pass its packet on to an interface
+	it is connected to, the interface iterates over its routing table.
+	5. In level 6 with seed "sbos", the internet has its own interface.
+	Most of the time it won't have one though, in which case its interface
+	IP and mask are always set to its neighboring interface's settings, with
+	the last byte set to 1.
+	6. Always set empty client routing table destinations to "default" (or 0.0.0.1/0 sometimes for the internet?).
+	7. Routers can't be abstracted away, because interfaces aren't capable
+	of asserting whether other interfaces should be part of the same network.
+	Routers assert where networks end.
+	8. Packets can not immediately travel back to the place they just came from.
+
+	The setup phase of the program:
+	1. Set every client's destination to "default", unless it is the internet,
+	in which case TODO: ?
+
+	The program executes these steps in a loop until the puzzle is solved:
+	1. Iterate over all interface masks. If a network's mask is known,
+	floodfill it to all other interfaces on the network. If the floodfill
+	encounters either an interface with a non-NULL mask,
+	then stop floodfilling in that direction.
+
+	?. Use known destinations of routes
+	to set client (and maybe also router) interface IPs?
+	?. If a route doesn't have a next hop set, recursively try to set it
+	for every neighboring router with a known IP?
+	?. Use that /32 always being the same as /0,
+	both as interface masks and routing masks?
+	"""
 	for goal in level["goals"]:
-		print(goal)
+		# print(goal)
+		pass
 
 
 def print_level(level):
