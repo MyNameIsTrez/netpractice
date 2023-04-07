@@ -1,4 +1,5 @@
 import json
+import more_itertools
 # from pprint import pprint
 
 
@@ -8,18 +9,22 @@ def main():
 	mark_known(level)
 	convert_to_trits(level)
 	# solve(level)
-	# print_level(level)
+
+	# level["interfaces"]["C1"]["ip"] = [1] * 31
+	# level["interfaces"]["C1"]["ip"].append(0)
+
+	print_solution(level)
 
 
 def mark_known(level):
 	for interface in level["interfaces"].values():
-		interface["ip_known"] = interface["ip"] is not None
-		interface["mask_known"] = interface["mask"] is not None
+		interface["ip_unknown"] = interface["ip"] is None
+		interface["mask_unknown"] = interface["mask"] is None
 
 		for route in interface["routing_table"]:
-			route["destination_known"] = route["destination"] is not None
-			route["cidr_known"] = route["cidr"] is not None
-			route["next_hop_known"] = route["next_hop"] is not None
+			route["destination_unknown"] = route["destination"] is None
+			route["cidr_unknown"] = route["cidr"] is None
+			route["next_hop_unknown"] = route["next_hop"] is None
 
 
 def convert_to_trits(level):
@@ -28,38 +33,38 @@ def convert_to_trits(level):
 	"""
 	for interface in level["interfaces"].values():
 		if interface["ip"]:
-			interface["ip"] = convert_bit_string_to_trit_field(interface["ip"])
+			interface["ip"] = get_trits(interface["ip"])
 		else:
-			interface["ip"] = get_empty_trit_field()
+			interface["ip"] = get_empty_trits()
 
 		if interface["mask"]:
-			interface["mask"] = convert_bit_string_to_trit_field(interface["mask"])
+			interface["mask"] = get_trits(interface["mask"])
 		else:
-			interface["mask"] = get_empty_trit_field()
+			interface["mask"] = get_empty_trits()
 
 		for route in interface["routing_table"]:
 			if route["destination"]:
-				route["destination"] = convert_bit_string_to_trit_field(route["destination"])
+				route["destination"] = get_trits(route["destination"])
 			else:
-				route["destination"] = get_empty_trit_field()
+				route["destination"] = get_empty_trits()
 
 			if route["cidr"]:
-				route["cidr"] = convert_bit_string_to_trit_field(route["cidr"])
+				route["cidr"] = get_trits(route["cidr"])
 			else:
-				route["cidr"] = get_empty_trit_field()
+				route["cidr"] = get_empty_trits()
 
 			if route["next_hop"]:
-				route["next_hop"] = convert_bit_string_to_trit_field(route["next_hop"])
+				route["next_hop"] = get_trits(route["next_hop"])
 			else:
-				route["next_hop"] = get_empty_trit_field()
+				route["next_hop"] = get_empty_trits()
 
 
-def convert_bit_string_to_trit_field(bit_string):
+def get_trits(bit_string):
 	# [2:] is to chop off the "0b" part
 	return [bit for byte in bit_string.split(".") for bit in bin(int(byte))[2:]]
 
 
-def get_empty_trit_field():
+def get_empty_trits():
 	return [None for _ in range(32)]
 
 
@@ -108,7 +113,7 @@ def solve(level):
 		pass
 
 
-def print_level(level):
+def print_solution(level):
 	print_interfaces(level["interfaces"])
 
 
@@ -117,22 +122,22 @@ def print_interfaces(interfaces):
 	for interface_name, interface in interfaces.items():
 		interface_string = ""
 
-		if not interface["ip_known"]:
-			interface_string += f", ip: {interface['ip']}"
-		if not interface["mask_known"]:
-			interface_string += f", mask: {interface['mask']}"
+		if interface["ip_unknown"]:
+			interface_string += f", ip: {get_bit_string(interface['ip'])}"
+		if interface["mask_unknown"]:
+			interface_string += f", mask: {get_bit_string(interface['mask'])}"
 
 		routes_string = ""
 
 		for route in interface["routing_table"]:
 			route_string = ""
 
-			if not route["destination_known"]:
-				route_string += f"destination: {route['destination']}, "
-			if not route["cidr_known"]:
-				route_string += f"cidr: {route['cidr']}, "
-			if not route["next_hop_known"]:
-				route_string += f"next_hop: {route['next_hop']}, "
+			if route["destination_unknown"]:
+				route_string += f"destination: {get_bit_string(route['destination'])}, "
+			if route["cidr_unknown"]:
+				route_string += f"cidr: {get_bit_string(route['cidr'])}, "
+			if route["next_hop_unknown"]:
+				route_string += f"next_hop: {get_bit_string(route['next_hop'])}, "
 
 			if route_string:
 				routes_string += f"{{ {route_string}}},"
@@ -142,6 +147,25 @@ def print_interfaces(interfaces):
 
 		if interface_string:
 			print(f"{interface_name}" + interface_string)
+
+
+def get_bit_string(trits):
+	if None in trits:
+		# TODO: Raise this error instead:
+		# raise ValueError("Encountered None trit.")
+		return None
+
+	bytes = []
+
+	# 8 is the number of bits in a byte.
+	for byte_bit_list in more_itertools.chunked(trits, 8):
+		byte = 0
+		for bit in byte_bit_list:
+			byte = (byte << 1) | bit
+
+		bytes.append(str(byte))
+
+	return ".".join(bytes)
 
 
 if __name__ == "__main__":
