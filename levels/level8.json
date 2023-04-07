@@ -26,6 +26,16 @@
 		"R22",
 		"R23"
 	],
+	"interface_network_neighbors": {
+		"C1": [ "R22" ],
+		"D1": [ "R23" ],
+		"I1": [ "R12" ],
+		"R12": [ "I1" ],
+		"R13": [ "R21" ],
+		"R21": [ "R13" ],
+		"R22": [ "C1" ],
+		"R23": [ "D1" ]
+	},
 	"interfaces": {
 		"C1": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },
 		"D1": { "ip": null, "mask": "255.255.255.240", "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },

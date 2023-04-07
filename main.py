@@ -61,7 +61,7 @@ def convert_to_trits(level):
 
 def get_trits(bit_string):
 	# [2:] is to chop off the "0b" part
-	return [bit for byte in bit_string.split(".") for bit in bin(int(byte))[2:]]
+	return [int(bit) for byte in bit_string.split(".") for bit in bin(int(byte))[2:]]
 
 
 def get_empty_trits():
@@ -108,22 +108,31 @@ def solve(level):
 	?. Use that /32 always being the same as /0,
 	both as interface masks and routing masks?
 	"""
-	for interface_name, interface in level["interfaces"].items():
-		for trit in interface["ip"]:
-			pass
+	interfaces = level["interfaces"]
 
-		for trit in interface["mask"]:
-			pass
+	for interface_name, interface in interfaces.items():
+		# for trit in interface["ip"]:
+		# 	pass
+
+		if None in interface["mask"]:
+			# Try to copy a mask from another interface in the network.
+			for neighbor_name in level["interface_network_neighbors"][interface_name]:
+				neighbor_mask = interfaces[neighbor_name]["mask"]
+
+				if None not in neighbor_mask:
+					interface["mask"] = neighbor_mask.copy()
 
 		for route in interface["routing_table"]:
-			for trit in route["destination"]:
-				pass
+			pass
 
-			for trit in route["cidr"]:
-				pass
+			# for trit in route["destination"]:
+			# 	pass
 
-			for trit in route["next_hop"]:
-				pass
+			# for trit in route["cidr"]:
+			# 	pass
+
+			# for trit in route["next_hop"]:
+			# 	pass
 
 
 def print_solution(level):
