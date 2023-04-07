@@ -59,8 +59,9 @@ def convert_to_trits(level):
 
 
 def get_trits(bit_string):
-    # [2:] is to chop off the "0b" part
-    return [int(bit) for byte in bit_string.split(".") for bit in bin(int(byte))[2:]]
+    return [
+        int(bit) for byte in bit_string.split(".") for bit in format(int(byte), "08b")
+    ]
 
 
 def get_empty_trits():
