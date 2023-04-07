@@ -6,8 +6,9 @@ def main():
 	with open("levels/level8.json") as f:
 		level = json.load(f)
 	mark_known(level)
-	solve(level)
-	print_level(level)
+	convert_to_trits(level)
+	# solve(level)
+	# print_level(level)
 
 
 def mark_known(level):
@@ -19,6 +20,47 @@ def mark_known(level):
 			route["destination_known"] = route["destination"] is not None
 			route["cidr_known"] = route["cidr"] is not None
 			route["next_hop_known"] = route["next_hop"] is not None
+
+
+def convert_to_trits(level):
+	"""Trit standing for trinary digit,
+	since the values are either None, 0, or 1.
+	"""
+	for interface in level["interfaces"].values():
+		if interface["ip"]:
+			interface["ip"] = convert_bit_string_to_trit_field(interface["ip"])
+		else:
+			interface["ip"] = get_empty_trit_field()
+
+		if interface["mask"]:
+			interface["mask"] = convert_bit_string_to_trit_field(interface["mask"])
+		else:
+			interface["mask"] = get_empty_trit_field()
+
+		for route in interface["routing_table"]:
+			if route["destination"]:
+				route["destination"] = convert_bit_string_to_trit_field(route["destination"])
+			else:
+				route["destination"] = get_empty_trit_field()
+
+			if route["cidr"]:
+				route["cidr"] = convert_bit_string_to_trit_field(route["cidr"])
+			else:
+				route["cidr"] = get_empty_trit_field()
+
+			if route["next_hop"]:
+				route["next_hop"] = convert_bit_string_to_trit_field(route["next_hop"])
+			else:
+				route["next_hop"] = get_empty_trit_field()
+
+
+def convert_bit_string_to_trit_field(bit_string):
+	# [2:] is to chop off the "0b" part
+	return [bit for byte in bit_string.split(".") for bit in bin(int(byte))[2:]]
+
+
+def get_empty_trit_field():
+	return [None for _ in range(32)]
 
 
 def solve(level):
@@ -41,10 +83,12 @@ def solve(level):
 	of asserting whether other interfaces should be part of the same network.
 	Routers assert where networks end.
 	8. Packets can not immediately travel back to the place they just came from.
+	9. 127.x.x.x throws the error "loopback address detected", and
+	anything above 223.255.255.255 throws the error "invalid IP".
 
 	The setup phase of the program:
-	1. Set every client's destination to "default", unless it is the internet,
-	in which case TODO: ?
+	1. Set every unknown client destination to "default",
+	unless it is the internet, in which case TODO: ?
 
 	The program executes these steps in a loop until the puzzle is solved:
 	1. Iterate over all interface masks. If a network's mask is known,

@@ -29,9 +29,9 @@
 	"interfaces": {
 		"C1": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },
 		"D1": { "ip": null, "mask": "255.255.255.240", "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },
-		"I1": { "ip": "163.115.250.1", "mask": "255.255.255.240", "routing_table": [ { "destination": "133.245.16.0", "cidr": 26, "next_hop": null } ] },
-		"R12": { "ip": "163.115.250.12", "mask": "255.255.255.240", "routing_table": [ { "destination": null, "cidr": null, "next_hop": null }, { "destination": "0.0.0.0", "cidr": 0, "next_hop": "163.115.250.1" } ] },
-		"R13": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": null }, { "destination": "0.0.0.0", "cidr": 0, "next_hop": "163.115.250.1" } ] },
+		"I1": { "ip": "163.115.250.1", "mask": "255.255.255.240", "routing_table": [ { "destination": "133.245.16.0", "cidr": "255.255.255.192", "next_hop": null } ] },
+		"R12": { "ip": "163.115.250.12", "mask": "255.255.255.240", "routing_table": [ { "destination": null, "cidr": null, "next_hop": null }, { "destination": "0.0.0.0", "cidr": "0.0.0.0", "next_hop": "163.115.250.1" } ] },
+		"R13": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": null }, { "destination": "0.0.0.0", "cidr": "0.0.0.0", "next_hop": "163.115.250.1" } ] },
 		"R21": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": "133.245.16.62" } ] },
 		"R22": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": "133.245.16.62" } ] },
 		"R23": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": "133.245.16.62" } ] }
