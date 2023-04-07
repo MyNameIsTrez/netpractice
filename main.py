@@ -8,8 +8,8 @@ def main():
 		level = json.load(f)
 	mark_known(level)
 	convert_to_trits(level)
-	# solve(level)
 
+	solve(level)
 	# level["interfaces"]["C1"]["ip"] = [1] * 31
 	# level["interfaces"]["C1"]["ip"].append(0)
 
@@ -108,9 +108,22 @@ def solve(level):
 	?. Use that /32 always being the same as /0,
 	both as interface masks and routing masks?
 	"""
-	for goal in level["goals"]:
-		# print(goal)
-		pass
+	for interface_name, interface in level["interfaces"].items():
+		for trit in interface["ip"]:
+			pass
+
+		for trit in interface["mask"]:
+			pass
+
+		for route in interface["routing_table"]:
+			for trit in route["destination"]:
+				pass
+
+			for trit in route["cidr"]:
+				pass
+
+			for trit in route["next_hop"]:
+				pass
 
 
 def print_solution(level):
