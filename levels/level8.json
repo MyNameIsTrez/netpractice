@@ -36,6 +36,16 @@
 		"R22": [ "C1" ],
 		"R23": [ "D1" ]
 	},
+	"closest_other_router_interfaces": {
+		"C1": "R22",
+		"D1": "R23",
+		"I1": "R12",
+		"R12": "R21",
+		"R13": "R21",
+		"R21": "R13",
+		"R22": "R13",
+		"R23": "R13"
+	},
 	"interfaces": {
 		"C1": { "ip": null, "mask": null, "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },
 		"D1": { "ip": null, "mask": "255.255.255.240", "routing_table": [ { "destination": null, "cidr": null, "next_hop": null } ] },

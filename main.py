@@ -110,6 +110,8 @@ def solve(level):
     """
     interfaces = level["interfaces"]
 
+    closest_other_router_interfaces = level["closest_other_router_interfaces"]
+
     for interface_name, interface in interfaces.items():
         # for trit in interface["ip"]:
         # 	pass
@@ -131,8 +133,13 @@ def solve(level):
             # for trit in route["cidr"]:
             # 	pass
 
-			# for trit in route["next_hop"]:
-			# 	pass
+            # Finds the closest interface that's on another router,
+            # and use its IP as this route's next_hop.
+            if None in route["next_hop"]:
+                closest_other = closest_other_router_interfaces[interface_name]
+                closest_ip = interfaces[closest_other]["ip"]
+                if None not in closest_ip:
+                    route["next_hop"] = closest_ip.copy()
 
 
 def print_solution(level):
