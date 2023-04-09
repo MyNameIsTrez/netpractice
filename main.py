@@ -20,6 +20,9 @@ def setup(level):
     convert_to_trits(level)
 
     assign_default_destinations(level)
+    # floodfill_known_ips(level) # TODO:
+
+    floodfill_known_masks(level)
     assign_default_masks(level)
 
     if in_level_8(level):
@@ -94,6 +97,18 @@ def assign_default_destinations(level):
                 route["cidr"] = 0
 
 
+def floodfill_known_masks(level):
+    """Tries to copy a mask from another interface in the network."""
+    interfaces = level["interfaces"]
+
+    for interface_name, interface in interfaces.items():
+        if interface["mask"] is None:
+            for neighbor_name in level["network_neighbors_of_interfaces"][
+                interface_name
+            ]:
+                interface["mask"] = interfaces[neighbor_name]["mask"]
+
+
 def assign_default_masks(level):
     """Assign mask 29 to networks without a mask.
 
@@ -103,16 +118,9 @@ def assign_default_masks(level):
     """
     interfaces = level["interfaces"]
 
-    for neighbor_names in level["interface_network_neighbors"]:
-        if are_all_masks_empty(interfaces, neighbor_names):
-            for neighbor_name in neighbor_names:
-                interfaces[neighbor_name]["mask"] = 29
-
-
-def are_all_masks_empty(interfaces, neighbor_names):
-    return all(
-        interfaces[neighbor_name]["mask"] is None for neighbor_name in neighbor_names
-    )
+    for interface_name in interfaces:
+        if interfaces[interface_name]["mask"] is None:
+            interfaces[interface_name]["mask"] = 29
 
 
 def in_level_8(level):
@@ -198,12 +206,6 @@ def solve(level):
 
     for interface_name, interface in interfaces.items():
         # interface["ip"]
-
-        # Tries to copy a mask from another interface in the network.
-        for neighbor_name in level["network_neighbors_of_interfaces"][interface_name]:
-            neighbor_mask = interfaces[neighbor_name]["mask"]
-            if interface["mask"] is None:
-                interface["mask"] = neighbor_mask
 
         for route in interface["routing_table"]:
             pass

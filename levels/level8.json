@@ -1,10 +1,4 @@
 {
-	"interface_network_neighbors": [
-		[ "C1", "R22" ],
-		[ "D1", "R23" ],
-		[ "I1", "R12" ],
-		[ "R13", "R21" ]
-	],
 	"network_neighbors_of_interfaces": {
 		"C1": [ "R22" ],
 		"D1": [ "R23" ],
