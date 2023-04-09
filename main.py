@@ -6,14 +6,17 @@ import more_itertools
 def main():
     with open("levels/level8.json") as f:
         level = json.load(f)
+
+    setup(level)
+    solve(level)
+    print_solution(level)
+
+
+def setup(level):
     mark_known(level)
     convert_to_trits(level)
-
-    solve(level)
-    # level["interfaces"]["C1"]["ip"] = [1] * 31
-    # level["interfaces"]["C1"]["ip"].append(0)
-
-    print_solution(level)
+    # assign_default_destinations(level) # TODO:
+    # assign_restrictive_masks(level) # TODO:
 
 
 def mark_known(level):
@@ -147,33 +150,36 @@ def print_solution(level):
 def print_interfaces(interfaces):
     print("interfaces:")
     for interface_name, interface in interfaces.items():
-        interface_string = ""
+        interface_strings = []
 
         if interface["ip_unknown"]:
-            interface_string += f", ip: {get_bit_string(interface['ip'])}"
+            interface_strings.append(f"ip: {get_bit_string(interface['ip'])}")
         if interface["mask_unknown"]:
-            interface_string += f", mask: {get_bit_string(interface['mask'])}"
+            interface_strings.append(f"mask: {get_bit_string(interface['mask'])}")
 
-        routes_string = ""
+        routes_strings = []
 
         for route in interface["routing_table"]:
-            route_string = ""
+            route_strings = []
 
             if route["destination_unknown"]:
-                route_string += f"destination: {get_bit_string(route['destination'])}, "
+                route_strings.append(
+                    f"destination: {get_bit_string(route['destination'])}"
+                )
             if route["cidr_unknown"]:
-                route_string += f"cidr: {get_bit_string(route['cidr'])}, "
+                route_strings.append(f"cidr: {get_bit_string(route['cidr'])}")
             if route["next_hop_unknown"]:
-                route_string += f"next_hop: {get_bit_string(route['next_hop'])}, "
+                route_strings.append(f"next_hop: {get_bit_string(route['next_hop'])}")
 
-            if route_string:
-                routes_string += f"{{ {route_string}}},"
+            if route_strings:
+                routes_strings.append("{" + ", ".join(route_strings) + "}")
 
-        if routes_string:
-            interface_string += f", routing_table: [ {routes_string} ]"
+        if routes_strings:
+            interface_strings.append(f"routing_table: [ {', '.join(routes_strings)} ]")
 
-        if interface_string:
-            print(f"{interface_name}" + interface_string)
+        if interface_strings:
+            interface_strings.insert(0, interface_name)
+            print(", ".join(interface_strings))
 
 
 def get_bit_string(trits):
