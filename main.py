@@ -21,6 +21,11 @@ def setup(level):
 
     assign_default_destinations(level)
     assign_default_masks(level)
+
+    if in_level_8(level):
+        assign_level_8_internet_destination_ips(level)
+
+    # assign_ips_using_next_hops(level) # TODO:
     point_next_hops_to_closest_router(level)
     # assign_default_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
@@ -108,6 +113,29 @@ def are_all_masks_empty(interfaces, neighbor_names):
     return all(
         interfaces[neighbor_name]["mask"] is None for neighbor_name in neighbor_names
     )
+
+
+def in_level_8(level):
+    interfaces = level["interfaces"]
+
+    return (
+        "I1" in interfaces
+        and interfaces["I1"]["routing_table"]
+        and None not in interfaces["I1"]["routing_table"][0]["destination"]
+    )
+
+
+def assign_level_8_internet_destination_ips(level):
+    interfaces = level["interfaces"]
+    internet_route = interfaces["I1"]["routing_table"][0]
+
+    for i in range(internet_route["cidr"]):
+        interfaces["C1"]["ip"][i] = internet_route["destination"][i]
+        interfaces["D1"]["ip"][i] = internet_route["destination"][i]
+
+
+def assign_ips_using_next_hops(level):
+    pass
 
 
 def point_next_hops_to_closest_router(level):
