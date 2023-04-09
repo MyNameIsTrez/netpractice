@@ -17,8 +17,8 @@ def setup(level):
     convert_to_trits(level)
 
     assign_default_destinations(level)
-    # assign_restrictive_masks(level) # TODO:
-    # assign_available_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
+    assign_default_masks(level)
+    # assign_default_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
 
 def mark_known(level):
@@ -86,6 +86,28 @@ def assign_default_destinations(level):
                 route["cidr"] = 0
 
 
+def assign_default_masks(level):
+    """Assign mask 29 to networks without a mask.
+
+    Networks without a switch in them can always get away with mask 30,
+    but it's easier to not have to check whether there is a switch by
+    always assigning mask 29.
+    """
+    interfaces = level["interfaces"]
+
+    for neighbor_names in level["interface_network_neighbors"]:
+        if are_all_masks_empty(interfaces, neighbor_names):
+            for neighbor_name in neighbor_names:
+                interfaces[neighbor_name]["mask"] = 29
+
+
+def are_all_masks_empty(interfaces, neighbor_names):
+    return all(
+        interfaces[neighbor_name]["mask"] is None
+        for neighbor_name in neighbor_names
+    )
+
+
 def solve(level):
     """Replaces None values in level with solved values.
 
@@ -134,7 +156,7 @@ def solve(level):
         # interface["ip"]
 
         # Tries to copy a mask from another interface in the network.
-        for neighbor_name in level["interface_network_neighbors"][interface_name]:
+        for neighbor_name in level["network_neighbors_of_interfaces"][interface_name]:
             neighbor_mask = interfaces[neighbor_name]["mask"]
             if interface["mask"] is None:
                 interface["mask"] = neighbor_mask
