@@ -9,7 +9,9 @@ def main():
 
     setup(level)
     solve(level)
-    print_solution(level)
+    # TODO: Add this back in!
+    # if not is_solved(level["interfaces"]):
+    #     raise ValueError("There was an unsolved value! Report this to sbos.")
 
 
 def setup(level):
@@ -103,8 +105,7 @@ def assign_default_masks(level):
 
 def are_all_masks_empty(interfaces, neighbor_names):
     return all(
-        interfaces[neighbor_name]["mask"] is None
-        for neighbor_name in neighbor_names
+        interfaces[neighbor_name]["mask"] is None for neighbor_name in neighbor_names
     )
 
 
@@ -175,9 +176,21 @@ def solve(level):
                 route["next_hop"] = interfaces[closest_other]["ip"].copy()
 
 
-def print_solution(level):
-    print_interfaces(level["interfaces"])
+def is_solved(interfaces):
+    """Checks that all unknown values have been found."""
+    for interface in interfaces.values():
+        if None in interface["ip"] or interface["mask"] is None:
+            return False
 
+        for route in interface["routing_table"]:
+            if (
+                None in route["destination"]
+                or route["cidr"] is None
+                or None in route["next_hop"]
+            ):
+                return False
+
+    return True
 
 def print_interfaces(interfaces):
     print("interfaces:")
@@ -215,9 +228,8 @@ def print_interfaces(interfaces):
 
 
 def get_bit_string(trits):
+    # TODO: Get rid of this, since is_solved() handles this!
     if None in trits:
-        # TODO: Raise this error instead:
-        # raise ValueError("Encountered None trit.")
         return None
 
     bytes = []
