@@ -71,23 +71,19 @@ def get_empty_trits():
 
 
 def assign_default_destinations(level):
-    """Assign clients a default destination of "0.0.0.1" and a CIDR of 0.
+    """Assign all unknown route destinations to "0.0.0.1" and a CIDR of 0.
 
     The reason "0.0.0.0" or "default" isn't used instead, is because those
-    throws "invalid default route on internet I" in the logs
+    throw "invalid default route on internet I" in the logs
     when used as the internet's destination.
-    And so it's easiest to just use "0.0.0.1" for all other clients as well.
+    And so it's easiest to just use "0.0.0.1" for all other clients and router
+    interfaces as well.
     """
-    for interface_name, interface in level["interfaces"].items():
-        if is_client_interface(interface_name):
-            for route in interface["routing_table"]:
-                if None in route["destination"]:
-                    route["destination"] = [0] * 31 + [1]
-                    route["cidr"] = 0
-
-
-def is_client_interface(interface_name):
-    return interface_name[0] != "R"
+    for interface in level["interfaces"].values():
+        for route in interface["routing_table"]:
+            if None in route["destination"]:
+                route["destination"] = [0] * 31 + [1]
+                route["cidr"] = 0
 
 
 def solve(level):
