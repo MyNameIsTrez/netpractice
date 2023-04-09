@@ -21,6 +21,7 @@ def setup(level):
 
     assign_default_destinations(level)
     assign_default_masks(level)
+    point_next_hops_to_closest_router(level)
     # assign_default_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
 
@@ -109,6 +110,22 @@ def are_all_masks_empty(interfaces, neighbor_names):
     )
 
 
+def point_next_hops_to_closest_router(level):
+    """Looks up the name of the closest interface that's on another router,
+    and lets this route's next_hop point to that other router's IP.
+    """
+
+    closest_other_router_interfaces = level["closest_other_router_interfaces"]
+    interfaces = level["interfaces"]
+
+    for interface_name, interface in interfaces.items():
+        closest_other = closest_other_router_interfaces[interface_name]
+
+        for route in interface["routing_table"]:
+            if None in route["next_hop"]:
+                route["next_hop"] = interfaces[closest_other]["ip"]
+
+
 def solve(level):
     """Replaces None values in level with solved values.
 
@@ -151,8 +168,6 @@ def solve(level):
     """
     interfaces = level["interfaces"]
 
-    closest_other_router_interfaces = level["closest_other_router_interfaces"]
-
     for interface_name, interface in interfaces.items():
         # interface["ip"]
 
@@ -168,12 +183,6 @@ def solve(level):
             # route["destination"]
 
             # route["cidr"]
-
-            # Finds the closest interface that's on another router,
-            # and use its IP as this route's next_hop.
-            closest_other = closest_other_router_interfaces[interface_name]
-            if None in route["next_hop"]:
-                route["next_hop"] = interfaces[closest_other]["ip"].copy()
 
 
 def is_solved(interfaces):
