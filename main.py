@@ -1,4 +1,5 @@
 import json
+
 import more_itertools
 
 
@@ -113,33 +114,30 @@ def solve(level):
     closest_other_router_interfaces = level["closest_other_router_interfaces"]
 
     for interface_name, interface in interfaces.items():
-        # for trit in interface["ip"]:
-        # 	pass
+        # interface["ip"]
 
-        if None in interface["mask"]:
-            # Try to copy a mask from another interface in the network.
-            for neighbor_name in level["interface_network_neighbors"][interface_name]:
-                neighbor_mask = interfaces[neighbor_name]["mask"]
-
-                if None not in neighbor_mask:
-                    interface["mask"] = neighbor_mask.copy()
+        # Try to copy a mask from another interface in the network.
+        for neighbor_name in level["interface_network_neighbors"][interface_name]:
+            neighbor_mask = interfaces[neighbor_name]["mask"]
+            fill_unknown_trits(interface["mask"], neighbor_mask)
 
         for route in interface["routing_table"]:
             pass
 
-            # for trit in route["destination"]:
-            # 	pass
+            # route["destination"]
 
-            # for trit in route["cidr"]:
-            # 	pass
+            # route["cidr"]
 
             # Finds the closest interface that's on another router,
             # and use its IP as this route's next_hop.
-            if None in route["next_hop"]:
-                closest_other = closest_other_router_interfaces[interface_name]
-                closest_ip = interfaces[closest_other]["ip"]
-                if None not in closest_ip:
-                    route["next_hop"] = closest_ip.copy()
+            closest_other = closest_other_router_interfaces[interface_name]
+            fill_unknown_trits(route["next_hop"], interfaces[closest_other]["ip"])
+
+
+def fill_unknown_trits(a_trits, b_trits):
+    for trit_index, b_trit in enumerate(b_trits):
+        if a_trits[trit_index] is None:
+            a_trits[trit_index] = b_trit
 
 
 def print_solution(level):
