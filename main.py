@@ -15,8 +15,9 @@ def main():
 def setup(level):
     mark_known(level)
     convert_to_trits(level)
-    # assign_default_destinations(level) # TODO:
+    assign_default_destinations(level)
     # assign_restrictive_masks(level) # TODO:
+    # ?(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
 
 def mark_known(level):
@@ -70,6 +71,33 @@ def get_trits(bit_string):
 
 def get_empty_trits():
     return [None for _ in range(32)]
+
+
+def assign_default_destinations(level):
+    """Assign clients a default destination of "0.0.0.1" and a CIDR of 0.
+
+    The reason "0.0.0.0" or "default" isn't used instead, is because those
+    throws "invalid default route on internet I" in the logs
+    when used as the internet's destination.
+    And so it's easiest to just use "0.0.0.1" for all other clients as well.
+    """
+    for interface_name, interface in level["interfaces"].items():
+        if is_client_interface(interface_name):
+            for route in interface["routing_table"]:
+                if None in route["destination"]:
+                    route["destination"] = get_zeros_list()
+                    route["destination"][31] = 1
+
+                    # TODO: Let cidr just be a single number?
+                    route["cidr"] = get_zeros_list()
+
+
+def is_client_interface(interface_name):
+    return interface_name[0] != "R"
+
+
+def get_zeros_list():
+    return [0] * 32
 
 
 def solve(level):
