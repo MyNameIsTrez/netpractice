@@ -12,6 +12,7 @@ def main():
     # TODO: Add this back in!
     # if not is_solved(level["interfaces"]):
     #     raise ValueError("There was an unsolved value! Report this to sbos.")
+    print_interface_solutions(level["interfaces"])
 
 
 def setup(level):
@@ -30,7 +31,6 @@ def mark_known(level):
 
         for route in interface["routing_table"]:
             route["destination_unknown"] = route["destination"] is None
-            route["cidr_unknown"] = route["cidr"] is None
             route["next_hop_unknown"] = route["next_hop"] is None
 
 
@@ -192,7 +192,8 @@ def is_solved(interfaces):
 
     return True
 
-def print_interfaces(interfaces):
+
+def print_interface_solutions(interfaces):
     print("interfaces:")
     for interface_name, interface in interfaces.items():
         interface_strings = []
@@ -209,10 +210,9 @@ def print_interfaces(interfaces):
 
             if route["destination_unknown"]:
                 route_strings.append(
-                    f"destination: {get_bit_string(route['destination'])}"
+                    f"destination: {get_bit_string(route['destination'])}/{route['cidr']}"
                 )
-            if route["cidr_unknown"]:
-                route_strings.append(f"cidr: {route['cidr']}")
+
             if route["next_hop_unknown"]:
                 route_strings.append(f"next_hop: {get_bit_string(route['next_hop'])}")
 
