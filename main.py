@@ -15,9 +15,10 @@ def main():
 def setup(level):
     mark_known(level)
     convert_to_trits(level)
+
     assign_default_destinations(level)
     # assign_restrictive_masks(level) # TODO:
-    # ?(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
+    # assign_available_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
 
 def mark_known(level):
@@ -42,9 +43,7 @@ def convert_to_trits(level):
             interface["ip"] = get_empty_trits()
 
         if interface["mask"]:
-            interface["mask"] = get_trits(interface["mask"])
-        else:
-            interface["mask"] = get_empty_trits()
+            interface["mask"] = interface["mask"]
 
         for route in interface["routing_table"]:
             if route["destination"]:
@@ -53,9 +52,7 @@ def convert_to_trits(level):
                 route["destination"] = get_empty_trits()
 
             if route["cidr"]:
-                route["cidr"] = get_trits(route["cidr"])
-            else:
-                route["cidr"] = get_empty_trits()
+                route["cidr"] = route["cidr"]
 
             if route["next_hop"]:
                 route["next_hop"] = get_trits(route["next_hop"])
@@ -85,19 +82,12 @@ def assign_default_destinations(level):
         if is_client_interface(interface_name):
             for route in interface["routing_table"]:
                 if None in route["destination"]:
-                    route["destination"] = get_zeros_list()
-                    route["destination"][31] = 1
-
-                    # TODO: Let cidr just be a single number?
-                    route["cidr"] = get_zeros_list()
+                    route["destination"] = [0] * 31 + [1]
+                    route["cidr"] = 0
 
 
 def is_client_interface(interface_name):
     return interface_name[0] != "R"
-
-
-def get_zeros_list():
-    return [0] * 32
 
 
 def solve(level):
@@ -147,10 +137,11 @@ def solve(level):
     for interface_name, interface in interfaces.items():
         # interface["ip"]
 
-        # Try to copy a mask from another interface in the network.
+        # Tries to copy a mask from another interface in the network.
         for neighbor_name in level["interface_network_neighbors"][interface_name]:
             neighbor_mask = interfaces[neighbor_name]["mask"]
-            fill_unknown_trits(interface["mask"], neighbor_mask)
+            if interface["mask"] is None:
+                interface["mask"] = neighbor_mask
 
         for route in interface["routing_table"]:
             pass
@@ -162,13 +153,8 @@ def solve(level):
             # Finds the closest interface that's on another router,
             # and use its IP as this route's next_hop.
             closest_other = closest_other_router_interfaces[interface_name]
-            fill_unknown_trits(route["next_hop"], interfaces[closest_other]["ip"])
-
-
-def fill_unknown_trits(a_trits, b_trits):
-    for trit_index, b_trit in enumerate(b_trits):
-        if a_trits[trit_index] is None:
-            a_trits[trit_index] = b_trit
+            if None in route["next_hop"]:
+                route["next_hop"] = interfaces[closest_other]["ip"].copy()
 
 
 def print_solution(level):
@@ -183,7 +169,7 @@ def print_interfaces(interfaces):
         if interface["ip_unknown"]:
             interface_strings.append(f"ip: {get_bit_string(interface['ip'])}")
         if interface["mask_unknown"]:
-            interface_strings.append(f"mask: {get_bit_string(interface['mask'])}")
+            interface_strings.append(f"mask: {interface['mask']}")
 
         routes_strings = []
 
@@ -195,7 +181,7 @@ def print_interfaces(interfaces):
                     f"destination: {get_bit_string(route['destination'])}"
                 )
             if route["cidr_unknown"]:
-                route_strings.append(f"cidr: {get_bit_string(route['cidr'])}")
+                route_strings.append(f"cidr: {route['cidr']}")
             if route["next_hop_unknown"]:
                 route_strings.append(f"next_hop: {get_bit_string(route['next_hop'])}")
 
