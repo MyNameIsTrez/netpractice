@@ -2,6 +2,8 @@ import json
 
 import more_itertools
 
+BITS_PER_ADDRESS = 32
+
 
 def main():
     with open("levels/level8.json") as f:
@@ -20,15 +22,15 @@ def setup(level):
     convert_to_trits(level)
 
     assign_default_destinations(level)
-    # floodfill_known_ips(level) # TODO:
 
-    floodfill_known_masks(level)
+    floodfill_masks(level)
     assign_default_masks(level)
 
     if in_level_8(level):
         assign_level_8_internet_destination_ips(level)
-
     # assign_ips_using_next_hops(level) # TODO:
+    floodfill_network_addresses(level)
+
     point_next_hops_to_closest_router(level)
     # assign_default_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
@@ -78,7 +80,7 @@ def get_trits(bit_string):
 
 
 def get_empty_trits():
-    return [None for _ in range(32)]
+    return [None for _ in range(BITS_PER_ADDRESS)]
 
 
 def assign_default_destinations(level):
@@ -97,7 +99,7 @@ def assign_default_destinations(level):
                 route["cidr"] = 0
 
 
-def floodfill_known_masks(level):
+def floodfill_masks(level):
     """Tries to copy a mask from another interface in the network."""
     interfaces = level["interfaces"]
 
@@ -144,6 +146,20 @@ def assign_level_8_internet_destination_ips(level):
 
 def assign_ips_using_next_hops(level):
     pass
+
+
+def floodfill_network_addresses(level):
+    interfaces = level["interfaces"]
+
+    for interface_name, neighbors in level["network_neighbors_of_interfaces"].items():
+        interface = interfaces[interface_name]
+
+        for i in range(interface["mask"]):
+            for neighbor_name in neighbors:
+                ip = interface["ip"]
+                neighbor_ip = interfaces[neighbor_name]["ip"]
+                if ip[i] is None:
+                    ip[i] = neighbor_ip[i]
 
 
 def point_next_hops_to_closest_router(level):
