@@ -2,11 +2,15 @@ import json
 
 import more_itertools
 
+# CONFIGURABLE
+LEVEL_NUMBER = 8
+
+
 BITS_PER_ADDRESS = 32
 
 
 def main():
-    with open("levels/level8.json") as f:
+    with open(f"levels/level{LEVEL_NUMBER}.json") as f:
         level = json.load(f)
 
     setup(level)
@@ -26,8 +30,9 @@ def setup(level):
     floodfill_masks(level)
     assign_default_masks(level)
 
-    if in_level_8(level):
-        assign_level_8_internet_destination_ips(level)
+    if LEVEL_NUMBER == 8:
+        use_level_8_internet_destination(level)
+        use_level_8_next_hop(level)
     # assign_ips_using_next_hops(level) # TODO:
     floodfill_network_addresses(level)
 
@@ -125,23 +130,23 @@ def assign_default_masks(level):
             interfaces[interface_name]["mask"] = 29
 
 
-def in_level_8(level):
-    interfaces = level["interfaces"]
-
-    return (
-        "I1" in interfaces
-        and interfaces["I1"]["routing_table"]
-        and None not in interfaces["I1"]["routing_table"][0]["destination"]
-    )
-
-
-def assign_level_8_internet_destination_ips(level):
+def use_level_8_internet_destination(level):
     interfaces = level["interfaces"]
     internet_route = interfaces["I1"]["routing_table"][0]
+    destination = internet_route["destination"]
 
     for i in range(internet_route["cidr"]):
-        interfaces["C1"]["ip"][i] = internet_route["destination"][i]
-        interfaces["D1"]["ip"][i] = internet_route["destination"][i]
+        interfaces["C1"]["ip"][i] = destination[i]
+        interfaces["D1"]["ip"][i] = destination[i]
+
+
+def use_level_8_next_hop(level):
+    interfaces = level["interfaces"]
+
+    for i in range(BITS_PER_ADDRESS):
+        interfaces["R13"]["ip"][i] = interfaces["R21"]["routing_table"][0]["next_hop"][
+            i
+        ]
 
 
 def assign_ips_using_next_hops(level):
