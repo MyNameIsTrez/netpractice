@@ -6,7 +6,8 @@ import more_itertools
 LEVEL_NUMBER = 8
 
 
-BITS_PER_ADDRESS = 32
+BITS_PER_BYTE = 8
+BITS_PER_ADDRESS = 4 * BITS_PER_BYTE
 
 
 def main():
@@ -34,10 +35,10 @@ def setup(level):
         use_level_8_internet_destination(level)
         use_level_8_next_hop(level)
     # assign_ips_using_next_hops(level) # TODO:
+    # assign_default_ips(level) # TODO:
     floodfill_network_addresses(level)
 
     point_next_hops_to_closest_router(level)
-    # assign_default_ips(level) # TODO: 1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc.
 
 
 def mark_known(level):
@@ -80,7 +81,9 @@ def convert_to_trits(level):
 
 def get_trits(bit_string):
     return [
-        int(bit) for byte in bit_string.split(".") for bit in format(int(byte), "08b")
+        int(bit)
+        for byte in bit_string.split(".")
+        for bit in format(int(byte), f"0{BITS_PER_BYTE}b")
     ]
 
 
@@ -150,6 +153,11 @@ def use_level_8_next_hop(level):
 
 
 def assign_ips_using_next_hops(level):
+    pass
+
+
+def assign_default_ips(level):
+    """1.1.1.1, 1.1.1.2 -> 2.2.2.1, 2.2.2.2, etc."""
     pass
 
 
@@ -294,8 +302,7 @@ def get_bit_string(trits):
 
     bytes = []
 
-    # 8 is the number of bits in a byte.
-    for byte_bit_list in more_itertools.chunked(trits, 8):
+    for byte_bit_list in more_itertools.chunked(trits, BITS_PER_BYTE):
         byte = 0
         for bit in byte_bit_list:
             byte = (byte << 1) | bit
